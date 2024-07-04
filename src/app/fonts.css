@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'NSTS';
+    src: url('../../public/fonts/Noto_Sans_Thai/NotoSansThai-SemiBold.ttf');
+}
+
+@font-face {
+font-family: 'NSTR';
+src: url('../../public/fonts/Noto_Sans_Thai/NotoSansThai-Regular.ttf');
+}

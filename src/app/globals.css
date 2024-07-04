@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './fonts.css';
+
+body {
+    font-family: 'NSTR' !important;
+}
+
+
+.custom-phone-input-container .custom-phone-input {
+    width: 100%;
+}
+
+.custom-phone-input-container .custom-phone-input:hover {
+    --react-international-phone-border-color: #37B34A;
+}
+
+.custom-phone-input-container .custom-phone-input:focus {
+    border: 1px solid #37B34A;
+    outline: none;
+}
