@@ -1,14 +1,13 @@
 'use client'
-import React, { ChangeEventHandler, FormEvent, useState, KeyboardEvent } from 'react';
+import React, { ChangeEventHandler, useState, KeyboardEvent } from 'react';
 import Image from 'next/image';
-import { Input, Button, Form, Checkbox } from 'antd';
+import { Input, Button, Form, Checkbox, CheckboxProps } from 'antd';
 import Link from 'next/link';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import Policy from '@/components/Modals/Policy';
 import Success from '@/components/Modals/Success';
-import type { CheckboxProps } from 'antd';
 import { FieldType } from '@/interfaces/register.interface';
 
 export default function RegisterPage() {
@@ -24,7 +23,8 @@ export default function RegisterPage() {
         phone: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        consent: isChecked
     });
 
     const policyShow = () => {
@@ -41,6 +41,7 @@ export default function RegisterPage() {
 
     const hdlCheckbox: CheckboxProps['onChange'] = (e) => {
         setIsChecked(e.target.checked);
+        setData(prev => ({ ...prev, consent: e.target.checked }));
     };
 
     const hdlChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -51,6 +52,13 @@ export default function RegisterPage() {
     const hdlKeyPressName = (e: KeyboardEvent<HTMLInputElement>) => {
         const char = String.fromCharCode(e.which);
         if (!/^[\u0E00-\u0E7F]$/.test(char)) {
+            e.preventDefault();
+        }
+    };
+
+    const hdlKeyPressPassword = (e: KeyboardEvent<HTMLInputElement>) => {
+        const char = String.fromCharCode(e.which);
+        if (/^[\u0E00-\u0E7F]$/.test(char)) {
             e.preventDefault();
         }
     };
@@ -67,7 +75,7 @@ export default function RegisterPage() {
         setData(prev => ({ ...prev, phone: value }));
     };
 
-    const validPassword = () => {
+    const checkConfirmPassword = () => {
         const password = data.password
         const confirmPassword = data.confirmPassword
         if (password != confirmPassword) {
@@ -76,7 +84,15 @@ export default function RegisterPage() {
         return Promise.resolve();
     }
 
-    const hdlSubmit = () => {
+    const validatePassword = (_: any, value: any) => {
+        const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_=><.+-])\S{8,20}$/;
+        if (value && !regex.test(value)) {
+            return Promise.reject("รหัสผ่านต้องมีความยาวอย่างน้อย 8 อักขระ ประกอบด้วย อักษรภาษาอังกฤษพิมพ์ใหญ่และพิมพ์เล็ก อักขระพิเศษ ตัวเลข ตัวอย่างรหัสผ่านที่ถูกต้อง : Lnwz@007");
+        }
+        return Promise.resolve();
+    };
+
+    const hdlSubmit = async () => {
         console.log('Form data:', data);
         setIsSuccessModalOpen(true);
     };
@@ -93,7 +109,7 @@ export default function RegisterPage() {
                 />
             </div>
             <div>
-                <Link href='/login'><ArrowLeftOutlined className='text-Pgreen text-[35px] mt-10 ml-10 absolute' /></Link>
+                <Link href='/login'><ArrowLeftOutlined style={{color: '#37B34A'}} className='text-[35px] mt-10 ml-10 absolute' /></Link>
             </div>
             <div className='bg-white w-1/2 h-full flex items-center justify-center'>
                 <div className='flex flex-col items-center w-2/4'>
@@ -133,6 +149,7 @@ export default function RegisterPage() {
                                 <Form.Item<FieldType>
                                     rules={[
                                         { required: true, message: 'กรุณากรอกนามสกุล' },
+
                                     ]}
                                     name='lastname'
                                 >
@@ -218,15 +235,17 @@ export default function RegisterPage() {
                             รหัสผ่าน
                         </label>
                         <Form.Item<FieldType>
-                            rules={[{ required: true, message: 'กรุณากรอกรหัสผ่าน' }]}
+                            rules={[{ required: true, message: 'กรุณากรอกรหัสผ่าน' },
+                            { validator: validatePassword }]}
                             name='password'
                         >
-                            <Input
+                            <Input.Password
                                 type='password'
                                 placeholder='รหัสผ่าน'
                                 value={data.password}
                                 name='password'
                                 onChange={hdlChange}
+                                onKeyPress={hdlKeyPressPassword}
                             />
                         </Form.Item>
 
@@ -236,31 +255,32 @@ export default function RegisterPage() {
                         <Form.Item<FieldType>
                             rules={[
                                 { required: true, message: 'กรุณากรอกรหัสยืนยัน' },
-                                { validator: validPassword }]}
+                                { validator: checkConfirmPassword }
+                            ]}
                             name='confirmPassword'
                         >
-                            <Input
+                            <Input.Password
                                 type='password'
                                 placeholder='ยืนยันรหัสผ่าน'
                                 value={data.confirmPassword}
                                 name='confirmPassword'
                                 onChange={hdlChange}
+                                onKeyPress={hdlKeyPressPassword}
                             />
                         </Form.Item>
 
                         <div className=''>
-                            {isChecked ? (
-                                <Button type='primary' htmlType='submit' className='w-full bg-Pgreen text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline border'>
-                                    สมัครสมาชิก
-                                </Button>
-                            ) : (
-                                <Button disabled type='primary' htmlType='submit' className='w-full bg-Pgreen text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline border'>
-                                    สมัครสมาชิก
-                                </Button>
-                            )}
+                            <Button
+                                disabled={!data.consent || !data.firstname || !data.lastname || !data.idNumber || !data.phone || !data.email || !data.password || !data.confirmPassword}
+                                htmlType='submit'
+                                className='w-full'
+                                type='primary'
+                            >
+                                สมัครสมาชิก
+                            </Button>
                         </div>
                         <div className="flex items-center mt-5">
-                            <Checkbox checked={isChecked} onChange={hdlCheckbox}>ฉันรับทราบและยอมรับ</Checkbox>
+                            <Checkbox checked={isChecked} name='consent' value={data.consent} onChange={hdlCheckbox}>ฉันรับทราบและยอมรับ</Checkbox>
                             <span className='text-Pgreen hover:underline cursor-pointer' onClick={policyShow}>นโยบายความเป็นส่วนตัว</span>
                         </div>
                     </Form>

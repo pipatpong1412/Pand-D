@@ -1,23 +1,29 @@
 'use client'
-import React from 'react'
+import React, { ChangeEventHandler, useState } from 'react'
 import Image from "next/image";
 import type { FormProps } from 'antd';
 import { Input, Button, Form, Checkbox } from 'antd';
 import Link from 'next/link';
-import 'antd/dist/reset.css';
+import { Login } from '@/interfaces/login.interface';
 
 export default function LoginPage() {
 
-    type FieldType = {
-        email?: string;
-        password?: string;
-    };
+    const [data, setData] = useState<Login>({
+        email: '',
+        password: ''
+    })
 
-    const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
+    const hdlChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+        const { name, value } = e.target
+        setData(prv => ({ ...prv, [name]: value }))
+        console.log(data)
+    }
+
+    const onFinish: FormProps<Login>['onFinish'] = (values) => {
         console.log('Success:', values);
     };
 
-    const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+    const onFinishFailed: FormProps<Login>['onFinishFailed'] = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
 
@@ -52,18 +58,25 @@ export default function LoginPage() {
                             <label className='block text-gray-700 text-sm font-bold mb-2 '>
                                 อีเมล
                             </label>
-                            <Form.Item<FieldType>
+                            <Form.Item<Login>
                                 name="email"
-                                rules={[{ required: true, message: 'อีเมลของคุณไม่ถูกต้อง' }]}
+                                rules={[{
+                                    type: 'email',
+                                    message: 'รูปแบบอีเมลไม่ถูกต้อง'
+                                },
+                                { required: true, message: 'อีเมลของคุณไม่ถูกต้อง' }]}
                             >
                                 <Input
+                                    name='email'
                                     type='email'
                                     placeholder='ชื่อผู้ใช้'
+                                    value={data.email}
+                                    onChange={hdlChange}
                                 />
                             </Form.Item>
                         </div>
                         <div className=''>
-                            <Form.Item<FieldType>
+                            <Form.Item<Login>
                                 name="password"
                                 rules={[{ required: true, message: 'กรุณากรอกรหัสผ่านให้ครบถ้วน' }]}
                             >
@@ -71,7 +84,9 @@ export default function LoginPage() {
                                     รหัสผ่าน
                                 </label>
                                 <Input.Password
-                                    // className='focus:outline-none focus:shadow-outline focus:border-Pgreen'
+                                    name='password'
+                                    value={data.password}
+                                    onChange={hdlChange}
                                     placeholder='รหัสผ่าน' />
                             </Form.Item>
                         </div>
@@ -85,7 +100,12 @@ export default function LoginPage() {
                             </div>
                         </div>
                         <div className='mt-2'>
-                            <Button htmlType='submit' className='w-full loggin-btn bg-Pgreen text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline border'>
+                            <Button
+                                disabled={!data.email || !data.password}
+                                type='primary'
+                                htmlType='submit'
+                                className='w-full'
+                            >
                                 เข้าสู่ระบบ
                             </Button>
                         </div>
