@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+
+    // reactStrictMode: false,
+    // // experimental: {
+    // //     serverActions: true,
+    // //     outputStandalone: false,
+    // // },
+    // output: 'standalone',
+    
     async redirects() {
         return [
             {
@@ -10,15 +18,15 @@ const nextConfig = {
         ];
     },
 
-    images: {
-        remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: 's3-alpha-sig.figma.com',
-                pathname: '**'
-            }
-        ]
-    }
+    // images: {
+    //     remotePatterns: [
+    //         {
+    //             protocol: 'https',
+    //             hostname: 's3-alpha-sig.figma.com',
+    //             pathname: '**'
+    //         }
+    //     ]
+    // }
 };
 
 export default nextConfig;
